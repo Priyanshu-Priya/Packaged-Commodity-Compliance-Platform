@@ -3,36 +3,84 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
   body {
-    @apply bg-gov-900 text-slate-100;
+    @apply bg-canvas text-ink font-sans antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background-color: #F9F7F3;
+    color: #171A1F;
+  }
+  * {
+    @apply border-border;
   }
 }
 
-/* Glassmorphism panel styles */
-.glass-panel {
-  background: rgba(16, 34, 58, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(212, 175, 55, 0.15);
+/* Enterprise surfaces */
+@layer components {
+  .card {
+    @apply bg-surface border border-border rounded-xl shadow-soft;
+  }
+  .card-hover {
+    @apply hover:shadow-soft-md hover:border-border-strong transition-all duration-200;
+  }
+  .card-interactive {
+    @apply card card-hover cursor-pointer;
+  }
+  .surface-subtle {
+    @apply bg-surface-subtle border border-border-subtle rounded-xl;
+  }
+  .btn-primary {
+    @apply bg-ink text-white hover:bg-black border border-transparent shadow-soft;
+  }
+  .btn-accent {
+    @apply bg-accent text-white hover:bg-accent-hover border border-transparent shadow-soft;
+  }
+  .btn-secondary {
+    @apply bg-surface text-ink border border-border hover:bg-surface-hover hover:border-border-strong shadow-soft;
+  }
+  .input-field {
+    @apply bg-surface border border-border rounded-lg px-3 py-2 text-[13px] text-ink placeholder:text-ink-tertiary focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink/10 transition-all;
+  }
 }
 
-.glass-panel-subtle {
-  background: rgba(11, 23, 40, 0.6);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-/* Custom Scrollbars */
+/* Subtle scrollbars for light theme */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #07101B;
+  background: #F9F7F3;
 }
 ::-webkit-scrollbar-thumb {
-  background: #19355A;
+  background: #D6D0C8;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #23497C;
+  background: #A8ADB7;
+}
+
+/* Focus rings */
+:focus-visible {
+  outline: 2px solid #0F766E;
+  outline-offset: 2px;
+}
+
+/* Animations - restrained */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Legacy compatibility - glass-panel mapped to new card for any missed components */
+.glass-panel {
+  @apply bg-surface border border-border rounded-xl shadow-soft;
+}
+.glass-panel-subtle {
+  @apply bg-surface-subtle border border-border-subtle rounded-xl;
 }

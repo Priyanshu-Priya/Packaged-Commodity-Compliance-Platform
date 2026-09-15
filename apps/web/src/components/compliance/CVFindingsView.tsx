@@ -1,6 +1,5 @@
 import React from 'react';
 import { ProductFacts } from '../../types';
-import { Focus, Eye, Ruler, ShieldCheck, HelpCircle } from 'lucide-react';
 import { StatusBadge } from '../StatusBadge';
 
 interface CVFindingsViewProps {
@@ -14,170 +13,88 @@ export const CVFindingsView: React.FC<CVFindingsViewProps> = ({ facts }) => {
   const fontHeightMm = facts.estimated_font_height_mm;
   const tampering = facts.tampering_detected;
 
+  type Row = { label: string; value: string; highlight?: boolean; warn?: boolean; danger?: boolean };
+  const cards: { title: string; subtitle: string; status: 'PASS' | 'REVIEW_REQUIRED'; rows: Row[]; note: string }[] = [
+    {
+      title: 'Rule 7: Numeral & Letter Height',
+      subtitle: 'Table I / Table II Statutory Height',
+      status: 'REVIEW_REQUIRED' as const,
+      rows: [
+        { label: 'Estimated Character Height', value: fontHeightMm != null ? `~${fontHeightMm} mm` : 'Estimating...' },
+        { label: 'Statutory Min. Required', value: '2.0 mm – 4.0 mm', highlight: true },
+        { label: 'Physical Calibration', value: 'Uncalibrated 2D Photo', warn: true },
+      ],
+      note: 'Absolute millimeter accuracy cannot be certified without calibrated scale reference. Marked REVIEW REQUIRED for officer inspection.',
+    },
+    {
+      title: 'Rule 8: Optical Blur & Sharpness',
+      subtitle: 'Laplacian Edge Variance (Threshold 75.0)',
+      status: (isBlurry ? 'REVIEW_REQUIRED' : 'PASS') as 'PASS' | 'REVIEW_REQUIRED',
+      rows: [
+        { label: 'Laplacian Variance Score', value: `${blurScore}`, danger: !!isBlurry },
+        { label: 'Sharpness Classification', value: isBlurry ? 'Defocused / Blurry' : 'Crisp & Definite Edges' },
+        { label: 'Legal Conformance', value: 'Rule 8 Plain & Definite' },
+      ],
+      note: isBlurry ? 'Potential motion or optical blur detected. Letters may be difficult for consumers to read clearly.' : 'Declarations satisfy statutory legibility with well-defined character contours.',
+    },
+    {
+      title: 'Rule 8: Background Contrast',
+      subtitle: 'RMS Intensity Dispersion (Threshold 30.0)',
+      status: (contrastScore < 30 ? 'REVIEW_REQUIRED' : 'PASS') as 'PASS' | 'REVIEW_REQUIRED',
+      rows: [
+        { label: 'Contrast Score', value: `${contrastScore}` },
+        { label: 'Separation Quality', value: contrastScore >= 30 ? 'High text-background distinction' : 'Low contrast substrate' },
+      ],
+      note: 'Declarations appear with sufficient contrast against commercial artwork and background colors.',
+    },
+    {
+      title: 'MRP Integrity & Sticker Analysis',
+      subtitle: 'Contour Boundary & Edge Density',
+      status: (tampering ? 'REVIEW_REQUIRED' : 'PASS') as 'PASS' | 'REVIEW_REQUIRED',
+      rows: [
+        { label: 'Secondary Overlay', value: tampering ? 'Detected (Sticker border)' : 'None (Directly printed)', warn: !!tampering },
+        { label: 'Verification Result', value: tampering ? 'Manual Inspection Recommended' : 'Consistent packaging substrate' },
+      ],
+      note: facts.tampering_reason || 'No evidence of price scratching, secondary stickers, or altered declarations.',
+    },
+  ];
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between border-b border-border-subtle pb-3">
         <div>
-          <h2 className="text-base font-bold text-white">Computer Vision &amp; Visual Dimension Analysis</h2>
-          <p className="text-xs text-slate-400">
-            Automated image processing metrics for Rule 7 (Font Height), Rule 8 (Legibility/Contrast), and Substrate Integrity.
-          </p>
+          <div className="text-[13px] font-semibold text-ink">Physical Label Analysis</div>
+          <div className="text-[11px] text-ink-tertiary mt-0.5">Automated image processing for Rule 7 (Font Height), Rule 8 (Legibility/Contrast), and MRP tampering</div>
         </div>
-        <span className="text-xs px-2.5 py-1 rounded bg-gov-800 text-gold-400 border border-gold-500/20 font-mono">
-          CV Rules 7 &amp; 8
-        </span>
+        <span className="text-[10px] px-2 py-1 rounded-full bg-surface border border-border text-ink-tertiary">CV Rules 7 & 8</span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* 1. Rule 7 - Font Height Estimation */}
-        <div className="glass-panel rounded-xl p-5 border border-slate-700/80 space-y-4">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center space-x-2.5">
-              <div className="p-2 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20">
-                <Ruler className="w-5 h-5" />
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {cards.map((c) => (
+          <div key={c.title} className="bg-surface border border-border rounded-xl p-4 shadow-soft space-y-3">
+            <div className="flex items-start justify-between gap-2">
               <div>
-                <h3 className="text-sm font-bold text-white">Rule 7: Numeral &amp; Letter Height</h3>
-                <p className="text-[11px] text-slate-400">Table I / Table II Statutory Height</p>
+                <div className="text-[12px] font-semibold text-ink">{c.title}</div>
+                <div className="text-[11px] text-ink-tertiary">{c.subtitle}</div>
               </div>
+              <StatusBadge status={c.status} size="sm" />
             </div>
-            <StatusBadge status="REVIEW_REQUIRED" size="sm" />
+            <div className="space-y-0 divide-y divide-border-subtle border-y border-border-subtle">
+              {c.rows.map((r) => (
+                <div key={r.label} className="flex justify-between py-2 text-[11px]">
+                  <span className="text-ink-tertiary">{r.label}</span>
+                  <span className={`font-mono font-medium ${r.highlight ? 'text-ink' : ''} ${r.warn ? 'text-warning' : ''} ${r.danger ? 'text-danger' : 'text-ink'}`}>{r.value}</span>
+                </div>
+              ))}
+            </div>
+            <div className="p-2.5 rounded-lg bg-surface-subtle border border-border-subtle text-[11px] text-ink-secondary leading-relaxed">{c.note}</div>
           </div>
+        ))}
+      </div>
 
-          <div className="space-y-2 pt-2 text-xs">
-            <div className="flex justify-between py-1.5 border-b border-slate-800">
-              <span className="text-slate-400">Estimated Character Height:</span>
-              <span className="font-mono text-slate-100 font-bold">
-                {fontHeightMm != null ? `~${fontHeightMm} mm` : 'Estimating...'}
-              </span>
-            </div>
-            <div className="flex justify-between py-1.5 border-b border-slate-800">
-              <span className="text-slate-400">Statutory Min. Required:</span>
-              <span className="font-mono text-gold-400 font-bold">2.0 mm – 4.0 mm</span>
-            </div>
-            <div className="flex justify-between py-1.5 border-b border-slate-800">
-              <span className="text-slate-400">Physical Calibration:</span>
-              <span className="text-amber-400 font-medium flex items-center space-x-1">
-                <HelpCircle className="w-3 h-3" />
-                <span>Uncalibrated 2D Photo</span>
-              </span>
-            </div>
-          </div>
-
-          <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 leading-relaxed">
-            <strong>Statutory Safety Guarantee:</strong> Absolute millimeter accuracy cannot be certified without a calibrated scale reference. Marked <strong>REVIEW REQUIRED</strong> for officer inspection.
-          </div>
-        </div>
-
-        {/* 2. Rule 8 - Optical Blur & Focus */}
-        <div className="glass-panel rounded-xl p-5 border border-slate-700/80 space-y-4">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center space-x-2.5">
-              <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <Focus className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-white">Rule 8: Optical Blur &amp; Sharpness</h3>
-                <p className="text-[11px] text-slate-400">Laplacian Edge Variance (Threshold: 75.0)</p>
-              </div>
-            </div>
-            <StatusBadge status={isBlurry ? 'REVIEW_REQUIRED' : 'PASS'} size="sm" />
-          </div>
-
-          <div className="space-y-2 pt-2 text-xs">
-            <div className="flex justify-between py-1.5 border-b border-slate-800">
-              <span className="text-slate-400">Laplacian Variance Score:</span>
-              <span className={`font-mono font-bold ${isBlurry ? 'text-rose-400' : 'text-emerald-400'}`}>
-                {blurScore}
-              </span>
-            </div>
-            <div className="flex justify-between py-1.5 border-b border-slate-800">
-              <span className="text-slate-400">Sharpness Classification:</span>
-              <span className="text-slate-200 font-medium">
-                {isBlurry ? 'Defocused / Blurry' : 'Crisp & Definite Edges'}
-              </span>
-            </div>
-            <div className="flex justify-between py-1.5 border-b border-slate-800">
-              <span className="text-slate-400">Legal Conformance:</span>
-              <span className="text-slate-200 font-medium">Rule 8 Plain &amp; Definite</span>
-            </div>
-          </div>
-
-          <div className="p-3 rounded-lg bg-gov-900 border border-slate-800 text-[11px] text-slate-400">
-            {isBlurry
-              ? 'Potential motion or optical blur detected. Letters may be difficult for consumers to read clearly.'
-              : 'Declarations satisfy statutory legibility requirements with well-defined character contours.'}
-          </div>
-        </div>
-
-        {/* 3. Rule 8 - Substrate Contrast */}
-        <div className="glass-panel rounded-xl p-5 border border-slate-700/80 space-y-4">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center space-x-2.5">
-              <div className="p-2 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                <Eye className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-white">Rule 8: Conspicuous Background Contrast</h3>
-                <p className="text-[11px] text-slate-400">RMS Intensity Dispersion (Threshold: 30.0)</p>
-              </div>
-            </div>
-            <StatusBadge status={contrastScore < 30 ? 'REVIEW_REQUIRED' : 'PASS'} size="sm" />
-          </div>
-
-          <div className="space-y-2 pt-2 text-xs">
-            <div className="flex justify-between py-1.5 border-b border-slate-800">
-              <span className="text-slate-400">Contrast Score:</span>
-              <span className="font-mono text-slate-100 font-bold">{contrastScore}</span>
-            </div>
-            <div className="flex justify-between py-1.5 border-b border-slate-800">
-              <span className="text-slate-400">Separation Quality:</span>
-              <span className="text-slate-200 font-medium">
-                {contrastScore >= 30 ? 'High text-background distinction' : 'Low contrast substrate'}
-              </span>
-            </div>
-          </div>
-
-          <div className="p-3 rounded-lg bg-gov-900 border border-slate-800 text-[11px] text-slate-400">
-            Declarations appear with sufficient contrast against commercial artwork and background colors.
-          </div>
-        </div>
-
-        {/* 4. Substrate Integrity & Sticker Analysis */}
-        <div className="glass-panel rounded-xl p-5 border border-slate-700/80 space-y-4">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center space-x-2.5">
-              <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-white">MRP Area &amp; Sticker Alteration Scan</h3>
-                <p className="text-[11px] text-slate-400">Contour Boundary &amp; Edge Density</p>
-              </div>
-            </div>
-            <StatusBadge status={tampering ? 'REVIEW_REQUIRED' : 'PASS'} size="sm" />
-          </div>
-
-          <div className="space-y-2 pt-2 text-xs">
-            <div className="flex justify-between py-1.5 border-b border-slate-800">
-              <span className="text-slate-400">Secondary Overlay:</span>
-              <span className={`font-medium ${tampering ? 'text-amber-400' : 'text-emerald-400'}`}>
-                {tampering ? 'Detected (Sticker border)' : 'None (Directly printed)'}
-              </span>
-            </div>
-            <div className="flex justify-between py-1.5 border-b border-slate-800">
-              <span className="text-slate-400">Verification Result:</span>
-              <span className="text-slate-200 font-medium">
-                {tampering ? 'Manual Inspection Recommended' : 'Consistent packaging substrate'}
-              </span>
-            </div>
-          </div>
-
-          <div className="p-3 rounded-lg bg-gov-900 border border-slate-800 text-[11px] text-slate-400">
-            {facts.tampering_reason || 'No evidence of price scratching, secondary stickers, or altered declarations.'}
-          </div>
-        </div>
+      <div className="bg-canvas border border-border-subtle rounded-xl p-3 flex items-start gap-2 text-[11px] text-ink-secondary">
+        <span className="mt-0.5">ⓘ</span>
+        <span><span className="font-medium text-ink">Confidence & transparency:</span> Blur score {blurScore}, contrast {contrastScore}, font ~{fontHeightMm ?? '—'} mm. All values come from OpenCV measurements – no invented probabilities.</span>
       </div>
     </div>
   );

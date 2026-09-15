@@ -1,5 +1,4 @@
 import React, { useState, useRef } from 'react';
-import { UploadCloud, FileImage, CheckCircle, AlertCircle, Sparkles, ArrowRight, Camera } from 'lucide-react';
 import { api } from '../services/api';
 import { CameraCapture } from '../components/CameraCapture';
 
@@ -54,10 +53,8 @@ export const NewScanView: React.FC<NewScanViewProps> = ({ onScanCreated }) => {
       setError('Please select or capture a packaged commodity image first.');
       return;
     }
-
     setUploading(true);
     setError(null);
-
     try {
       const result = await api.uploadScan(selectedFile, commodityType);
       setUploadResult(result);
@@ -69,212 +66,171 @@ export const NewScanView: React.FC<NewScanViewProps> = ({ onScanCreated }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Camera Capture Modal */}
-      {showCamera && (
-        <CameraCapture
-          onCapture={handleCameraCapture}
-          onClose={() => setShowCamera(false)}
-        />
-      )}
+    <div className="max-w-[1120px] mx-auto space-y-5">
+      {showCamera && <CameraCapture onCapture={handleCameraCapture} onClose={() => setShowCamera(false)} />}
 
-      {/* Page Title */}
-      <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Initiate Package Compliance Inspection</h1>
-        <p className="text-sm text-slate-300 mt-1">
-          Upload front, back, or Principal Display Panel (PDP) photograph of the packaged commodity for Legal Metrology analysis.
-        </p>
+      {/* Title */}
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+        <div>
+          <h1 className="text-[18px] font-semibold tracking-tight text-ink">Initiate Package Compliance Inspection</h1>
+          <p className="text-[12px] text-ink-secondary mt-1 max-w-2xl leading-relaxed">
+            Upload front, back, or Principal Display Panel (PDP) photograph. System validates image quality, extracts declarations, and verifies PCR 2011 rules.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 text-[11px] text-ink-tertiary">
+          <span className="px-2 py-1 rounded-full bg-surface border border-border">JPEG • PNG • WebP • 25MB max</span>
+        </div>
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center space-x-3 text-rose-300 text-sm">
-          <AlertCircle className="w-5 h-5 flex-shrink-0 text-rose-400" />
+        <div className="p-3 rounded-xl bg-danger-bg border border-danger-border flex items-start gap-2.5 text-[12px] text-danger">
+          <span className="mt-0.5">⚠</span>
           <span>{error}</span>
         </div>
       )}
 
-      {/* Upload & Configuration Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left 2 Cols: Drag & Drop Zone */}
-        <div className="md:col-span-2 space-y-4">
-          {/* Camera and Upload Options */}
-          <div className="flex gap-3">
-            <button
-              onClick={() => setShowCamera(true)}
-              className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all shadow-lg hover:shadow-blue-500/20"
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Left – upload */}
+        <div className="lg:col-span-8 space-y-4">
+          <div className="bg-surface border border-border rounded-xl shadow-soft p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-[12px] font-semibold tracking-wide uppercase text-ink-tertiary">Image Source</div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowCamera(true)}
+                  className="px-3 py-1.5 rounded-lg bg-ink text-white text-[12px] font-medium hover:bg-black border border-ink"
+                >
+                  Capture from Camera
+                </button>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-3 py-1.5 rounded-lg bg-surface border border-border text-[12px] font-medium hover:border-border-strong"
+                >
+                  Upload File
+                </button>
+              </div>
+            </div>
+
+            <div
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={handleDrop}
+              className="border border-dashed border-border-strong hover:border-ink/30 rounded-xl p-6 text-center bg-surface-subtle hover:bg-canvas transition-colors min-h-[320px] flex flex-col items-center justify-center"
             >
-              <Camera className="w-5 h-5" />
-              <span>Capture from Camera</span>
-            </button>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="flex-1 py-3 px-4 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all border border-slate-700"
-            >
-              <UploadCloud className="w-5 h-5" />
-              <span>Upload from Files</span>
-            </button>
+              <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFileChange} className="hidden" />
+
+              {previewUrl ? (
+                <div className="space-y-3 w-full">
+                  <div className="relative mx-auto max-w-[420px] rounded-xl overflow-hidden border border-border bg-white shadow-soft">
+                    <img src={previewUrl} alt="Preview" className="max-h-[320px] w-full object-contain" />
+                  </div>
+                  <div className="flex items-center justify-center gap-2 text-[11px] text-ink-secondary">
+                    <span className="px-2 py-0.5 rounded-full bg-surface border border-border font-mono">{selectedFile?.name}</span>
+                    <span>{selectedFile && (selectedFile.size / 1024).toFixed(1)} KB</span>
+                  </div>
+                  <div className="text-[11px] text-ink-tertiary">Click or drag to replace image</div>
+                </div>
+              ) : (
+                <div className="space-y-3 max-w-sm mx-auto">
+                  <div className="w-12 h-12 rounded-xl bg-surface border border-border flex items-center justify-center mx-auto text-ink-tertiary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
+                  </div>
+                  <div className="text-[13px] font-medium text-ink">Drop package image here</div>
+                  <div className="text-[11px] text-ink-secondary leading-relaxed">Drag & drop or use camera. Ensure Principal Display Panel is clearly visible with good lighting.</div>
+                </div>
+              )}
+            </div>
+
+            {/* Workflow steps */}
+            <div className="mt-4 grid grid-cols-5 gap-2 text-[10px]">
+              {[
+                { n: 1, label: 'Upload', active: true },
+                { n: 2, label: 'Analyze', active: !!uploadResult },
+                { n: 3, label: 'Extract', active: false },
+                { n: 4, label: 'Verify', active: false },
+                { n: 5, label: 'Result', active: false },
+              ].map((s) => (
+                <div key={s.n} className={`flex items-center gap-2 p-2 rounded-lg border ${s.active ? 'bg-ink text-white border-ink' : 'bg-surface-subtle border-border-subtle text-ink-tertiary'}`}>
+                  <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-medium border ${s.active ? 'bg-white/15 border-white/20 text-white' : 'bg-surface border-border text-ink-tertiary'}`}>{s.n}</span>
+                  <span className="font-medium">{s.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={handleDrop}
-            className="border-2 border-dashed border-slate-700 hover:border-gold-500/60 rounded-2xl p-8 text-center bg-gov-850/60 hover:bg-gov-800/60 transition-all flex flex-col items-center justify-center min-h-[280px]"
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-
-            {previewUrl ? (
-              <div className="space-y-4">
-                <img
-                  src={previewUrl}
-                  alt="Package Preview"
-                  className="max-h-60 rounded-lg mx-auto shadow-md border border-slate-700 object-contain"
-                />
-                <div className="flex items-center justify-center space-x-2 text-xs text-gold-400">
-                  <FileImage className="w-4 h-4" />
-                  <span>{selectedFile?.name} ({(selectedFile!.size / 1024).toFixed(1)} KB)</span>
+          {/* Upload result */}
+          {uploadResult && (
+            <div className="bg-surface border border-emerald-200 rounded-xl p-4 shadow-soft">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex gap-3">
+                  <div className="w-8 h-8 rounded-full bg-success-bg border border-success-border flex items-center justify-center text-success">✓</div>
+                  <div>
+                    <div className="text-[13px] font-semibold text-ink">Scan Registered Successfully</div>
+                    <div className="text-[11px] font-mono text-ink-secondary mt-0.5">ID: {uploadResult.scan_number} • SHA-256: {uploadResult.sha256_hash?.slice(0, 12)}…</div>
+                    <div className="mt-3 grid grid-cols-3 gap-2 text-[11px]">
+                      <div className="p-2 rounded-lg bg-surface-subtle border border-border-subtle"><div className="text-ink-tertiary">Resolution</div><div className="font-mono font-medium text-ink">{uploadResult.quality_assessment?.width}×{uploadResult.quality_assessment?.height}</div></div>
+                      <div className="p-2 rounded-lg bg-surface-subtle border border-border-subtle"><div className="text-ink-tertiary">Blur (Laplacian)</div><div className={`font-mono font-medium ${uploadResult.quality_assessment?.is_blurry ? 'text-warning' : 'text-success'}`}>{uploadResult.quality_assessment?.laplacian_variance} {uploadResult.quality_assessment?.is_blurry ? '• Blurry' : '• Crisp'}</div></div>
+                      <div className="p-2 rounded-lg bg-surface-subtle border border-border-subtle"><div className="text-ink-tertiary">Contrast</div><div className="font-mono font-medium text-ink">{uploadResult.quality_assessment?.contrast_score}</div></div>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-xs text-slate-400">Click or drag a new image to replace</p>
+                <button
+                  onClick={() => onScanCreated(uploadResult.scan_id)}
+                  className="shrink-0 px-4 py-2 bg-ink text-white text-[12px] font-medium rounded-lg hover:bg-black"
+                >
+                  Inspect Findings →
+                </button>
               </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="w-16 h-16 rounded-full bg-gov-800 border border-gold-500/30 flex items-center justify-center mx-auto text-gold-400">
-                  <FileImage className="w-8 h-8" />
-                </div>
-                <h3 className="text-base font-semibold text-white">No Image Selected</h3>
-                <p className="text-xs text-slate-400 max-w-sm">
-                  Capture using your camera or drag and drop image here
-                </p>
-                <div className="flex items-center justify-center space-x-2 text-[11px] text-slate-500">
-                  <span>JPEG, PNG, WebP</span>
-                  <span>•</span>
-                  <span>Max 25 MB</span>
-                </div>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* Right Col: Category & Action */}
-        <div className="glass-panel rounded-2xl p-6 space-y-6 flex flex-col justify-between">
-          <div className="space-y-4">
-            <h2 className="text-base font-bold text-white border-b border-slate-700/60 pb-2">
-              Inspection Parameters
-            </h2>
+        {/* Right – params */}
+        <div className="lg:col-span-4 space-y-4">
+          <div className="bg-surface border border-border rounded-xl shadow-soft p-5">
+            <div className="text-[11px] font-semibold tracking-widest uppercase text-ink-tertiary mb-3">Inspection Parameters</div>
 
-            <div>
-              <label htmlFor="commodity-select" className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
-                Commodity Category
-              </label>
-              <select
-                id="commodity-select"
-                value={commodityType}
-                onChange={(e) => setCommodityType(e.target.value)}
-                className="w-full bg-gov-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-gold-500 transition-all"
-              >
-                <option value="FOOD_GRAINS">Food Grains (Rice, Atta, Pulses)</option>
-                <option value="EDIBLE_OILS">Edible Oils & Vanaspati</option>
-                <option value="BISCUITS_CONFECTIONERY">Biscuits & Confectionery</option>
-                <option value="TEA_COFFEE">Tea & Coffee</option>
-                <option value="SOAP_DETERGENT">Soaps & Detergents</option>
-                <option value="BEVERAGES">Packaged Drinking Water & Beverages</option>
-                <option value="GENERAL_PACKAGED_GOODS">General Consumer Commodities</option>
-              </select>
-              <p className="text-[11px] text-slate-400 mt-1">
-                Used to determine Second Schedule standard sizes and Unit Sale Price requirements.
-              </p>
+            <label className="block text-[11px] font-medium text-ink-secondary mb-1.5">Commodity Category</label>
+            <select
+              value={commodityType}
+              onChange={(e) => setCommodityType(e.target.value)}
+              className="w-full bg-surface border border-border rounded-lg px-3 py-2.5 text-[13px] text-ink focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink/10"
+            >
+              <option value="FOOD_GRAINS">Food Grains (Rice, Atta, Pulses)</option>
+              <option value="EDIBLE_OILS">Edible Oils & Vanaspati</option>
+              <option value="BISCUITS_CONFECTIONERY">Biscuits & Confectionery</option>
+              <option value="TEA_COFFEE">Tea & Coffee</option>
+              <option value="SOAP_DETERGENT">Soaps & Detergents</option>
+              <option value="BEVERAGES">Packaged Water & Beverages</option>
+              <option value="GENERAL_PACKAGED_GOODS">General Consumer Commodities</option>
+            </select>
+            <div className="text-[11px] text-ink-tertiary mt-2 leading-relaxed">Determines Second Schedule standard sizes and USP requirements.</div>
+
+            <div className="mt-5 p-3 rounded-xl bg-surface-subtle border border-border-subtle">
+              <div className="text-[11px] font-semibold text-ink flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-accent" /> Automated Pipeline</div>
+              <div className="mt-2 space-y-1.5 text-[11px] text-ink-secondary leading-relaxed">
+                <div className="flex gap-2"><span className="text-ink-tertiary">1.</span><span>OpenCV preprocessing & blur assessment</span></div>
+                <div className="flex gap-2"><span className="text-ink-tertiary">2.</span><span>OCR text & bounding box extraction</span></div>
+                <div className="flex gap-2"><span className="text-ink-tertiary">3.</span><span>Mandatory declaration parsing</span></div>
+                <div className="flex gap-2"><span className="text-ink-tertiary">4.</span><span>PCR 2011 rule verification</span></div>
+              </div>
             </div>
 
-            <div className="p-3.5 rounded-lg bg-gov-900/80 border border-slate-700/70 text-xs space-y-1.5 text-slate-300">
-              <span className="font-semibold text-gold-400 flex items-center space-x-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Automated Pipeline</span>
-              </span>
-              <p className="text-[11px] text-slate-400">
-                1. OpenCV Preprocessing &amp; Blur Assessment<br/>
-                2. OCR Text &amp; Bounding Box Extraction<br/>
-                3. Mandatory Declaration Parsing<br/>
-                4. PCR 2011 Rule Verification
-              </p>
-            </div>
+            <button
+              onClick={handleUpload}
+              disabled={!selectedFile || uploading}
+              className={`w-full mt-5 py-2.5 rounded-lg text-[13px] font-medium border transition-all ${!selectedFile || uploading ? 'bg-surface-subtle text-ink-tertiary border-border-subtle cursor-not-allowed' : 'bg-ink text-white border-ink hover:bg-black shadow-soft'}`}
+            >
+              {uploading ? 'Processing image...' : 'Start Compliance Scan'}
+            </button>
+            <div className="mt-2 text-[10px] text-center text-ink-tertiary">AI extracts • Rules decide • Evidence-backed</div>
           </div>
 
-          <button
-            onClick={handleUpload}
-            disabled={!selectedFile || uploading}
-            className={`w-full py-3 rounded-lg font-bold text-sm shadow-lg flex items-center justify-center space-x-2 transition-all ${
-              !selectedFile || uploading
-                ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
-                : 'bg-gradient-to-r from-gold-500 to-amber-600 hover:from-gold-400 hover:to-amber-500 text-slate-950 hover:shadow-gold-500/20 cursor-pointer'
-            }`}
-          >
-            {uploading ? (
-              <span>Processing Perception Pipeline...</span>
-            ) : (
-              <>
-                <span>Start Compliance Scan</span>
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
+          <div className="bg-canvas border border-border-subtle rounded-xl p-4">
+            <div className="text-[11px] font-semibold text-ink">Evidence & Transparency</div>
+            <div className="text-[11px] text-ink-secondary mt-1 leading-relaxed">Every finding includes bounding box, confidence, and statutory citation. No black-box decisions.</div>
+          </div>
         </div>
       </div>
-
-      {/* Upload Confirmation & Quality Feedback */}
-      {uploadResult && (
-        <div className="glass-panel rounded-2xl p-6 border border-emerald-500/30 space-y-4 animate-in fade-in duration-300">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                <CheckCircle className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-white">Scan Registered Successfully</h3>
-                <p className="text-xs text-slate-400 font-mono">Scan ID: {uploadResult.scan_number}</p>
-              </div>
-            </div>
-            <button
-              onClick={() => onScanCreated(uploadResult.scan_id)}
-              className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold rounded-lg transition-all flex items-center space-x-1.5"
-            >
-              <span>Inspect Findings</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-700/60 text-xs">
-            <div className="p-3 bg-gov-900 rounded-lg">
-              <span className="text-slate-400 block">Resolution</span>
-              <span className="font-mono text-slate-200 font-semibold">
-                {uploadResult.quality_assessment?.width} × {uploadResult.quality_assessment?.height} px
-              </span>
-            </div>
-            <div className="p-3 bg-gov-900 rounded-lg">
-              <span className="text-slate-400 block">Blur Metric (Laplacian)</span>
-              <span className={`font-mono font-semibold ${uploadResult.quality_assessment?.is_blurry ? 'text-amber-400' : 'text-emerald-400'}`}>
-                {uploadResult.quality_assessment?.laplacian_variance} ({uploadResult.quality_assessment?.is_blurry ? 'Blurry' : 'Crisp'})
-              </span>
-            </div>
-            <div className="p-3 bg-gov-900 rounded-lg">
-              <span className="text-slate-400 block">Contrast Metric</span>
-              <span className="font-mono text-slate-200 font-semibold">
-                {uploadResult.quality_assessment?.contrast_score}
-              </span>
-            </div>
-            <div className="p-3 bg-gov-900 rounded-lg">
-              <span className="text-slate-400 block">Integrity (SHA-256)</span>
-              <span className="font-mono text-gold-300 font-semibold truncate block" title={uploadResult.sha256_hash}>
-                {uploadResult.sha256_hash?.slice(0, 10)}...
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

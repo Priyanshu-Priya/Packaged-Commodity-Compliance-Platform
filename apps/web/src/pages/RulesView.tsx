@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { BookOpen, FileCode } from 'lucide-react';
 import { api } from '../services/api';
 import { LegalRuleSet } from '../types';
 
@@ -24,93 +23,61 @@ export const RulesView: React.FC = () => {
 
   const categories = [
     { id: 'ALL', label: 'All Statutory Rules' },
-    { id: 'MANDATORY_DECLARATION', label: 'Rule 6 Mandatory Declarations' },
-    { id: 'QUANTITY', label: 'Net Quantity (Rule 6c, 11, 13)' },
-    { id: 'MRP', label: 'Pricing & USP (Rule 6e, 6da)' },
-    { id: 'FONT_SIZE', label: 'Numeral Height (Rule 7)' },
-    { id: 'LEGIBILITY', label: 'Legibility & Manner (Rule 8, 9)' },
-    { id: 'EXEMPTION', label: 'Statutory Exemptions (Rule 26)' },
+    { id: 'MANDATORY_DECLARATION', label: 'Rule 6 Mandatory' },
+    { id: 'QUANTITY', label: 'Net Quantity' },
+    { id: 'MRP', label: 'Pricing & USP' },
+    { id: 'FONT_SIZE', label: 'Numeral Height' },
+    { id: 'LEGIBILITY', label: 'Legibility' },
+    { id: 'EXEMPTION', label: 'Exemptions' },
   ];
 
-  const filteredRules = ruleset?.rules.filter((r) =>
-    selectedCategory === 'ALL' ? true : r.category === selectedCategory
-  ) ?? [];
+  const filteredRules = ruleset?.rules.filter((r) => selectedCategory === 'ALL' ? true : r.category === selectedCategory) ?? [];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
-          <div className="flex items-center space-x-2">
-            <BookOpen className="w-6 h-6 text-gold-400" />
-            <h1 className="text-2xl font-bold text-white tracking-tight">
-              Legal Metrology (Packaged Commodities) Rules, 2011
-            </h1>
-          </div>
-          <p className="text-sm text-slate-300 mt-1">
-            Authoritative statutory rule registry enforced by the compliance verification engine.
-          </p>
+          <h2 className="text-[18px] font-semibold tracking-tight text-ink">Legal Metrology (Packaged Commodities) Rules, 2011</h2>
+          <p className="text-[12px] text-ink-secondary mt-1">Authoritative statutory rule registry enforced by the compliance verification engine.</p>
         </div>
-        <div className="flex items-center space-x-2 bg-gov-850 px-3 py-1.5 rounded-lg border border-gold-500/20 text-xs">
-          <span className="text-slate-400">Ruleset Version:</span>
-          <span className="font-mono text-gold-400 font-bold">{ruleset?.ruleset_version || 'Loading...'}</span>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface border border-border text-[11px]">
+          <span className="text-ink-tertiary">Ruleset</span>
+          <span className="font-mono font-medium text-ink">{ruleset?.ruleset_version || 'Loading…'}</span>
+          <span className="w-px h-3 bg-border" />
+          <span className="text-ink-tertiary">{ruleset?.rules.length || 0} rules</span>
         </div>
       </div>
 
-      {/* Category Pills */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5 p-1 rounded-xl bg-surface-subtle border border-border-subtle w-fit">
         {categories.map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => setSelectedCategory(cat.id)}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              selectedCategory === cat.id
-                ? 'bg-gold-500 text-slate-950 shadow-md font-bold'
-                : 'bg-gov-800 text-slate-300 hover:bg-gov-700 hover:text-white border border-slate-700/60'
-            }`}
-          >
-            {cat.label}
-          </button>
+          <button key={cat.id} onClick={() => setSelectedCategory(cat.id)} className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors ${selectedCategory === cat.id ? 'bg-surface border border-border shadow-soft text-ink' : 'text-ink-secondary hover:text-ink'}`}>{cat.label}</button>
         ))}
       </div>
 
-      {/* Rules Grid */}
       {loading ? (
-        <div className="p-12 text-center text-slate-400">Loading statutory rule definitions...</div>
+        <div className="p-12 text-center text-[12px] text-ink-tertiary bg-surface border border-border rounded-xl">Loading statutory rule definitions…</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredRules.map((rule) => (
-            <div
-              key={rule.rule_id}
-              className="glass-panel rounded-xl p-5 border border-slate-700/70 hover:border-gold-500/30 transition-all flex flex-col justify-between"
-            >
-              <div className="space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <span className="px-2 py-0.5 rounded bg-gold-500/10 text-gold-400 text-xs font-mono font-bold border border-gold-500/20">
-                    {rule.source_rule}
-                  </span>
-                  <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${
-                    rule.severity === 'HIGH' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                  }`}>
-                    {rule.severity} Severity
-                  </span>
-                </div>
-
-                <h3 className="text-base font-bold text-white tracking-tight">{rule.title}</h3>
-                <p className="text-xs text-slate-300 leading-relaxed">{rule.description}</p>
+            <div key={rule.rule_id} className="bg-surface border border-border rounded-xl p-4 shadow-soft hover:shadow-soft-md hover:border-border-strong transition-all flex flex-col">
+              <div className="flex items-start justify-between gap-2 mb-3">
+                <span className="px-2 py-0.5 rounded-full bg-surface-subtle border border-border text-[10px] font-mono font-medium text-ink">{rule.source_rule}</span>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${rule.severity === 'HIGH' ? 'bg-danger-bg text-danger border-danger-border' : 'bg-warning-bg text-warning border-warning-border'}`}>{rule.severity}</span>
               </div>
-
-              <div className="pt-4 mt-4 border-t border-slate-700/60 flex items-center justify-between text-[11px] text-slate-400">
-                <span className="flex items-center space-x-1.5">
-                  <FileCode className="w-3.5 h-3.5 text-sky-400" />
-                  <span>Type: <strong className="text-slate-300">{rule.verification_type}</strong></span>
-                </span>
-                <span className="font-mono text-slate-400">{rule.rule_id}</span>
+              <h3 className="text-[13px] font-semibold text-ink leading-tight">{rule.title}</h3>
+              <p className="text-[11px] text-ink-secondary leading-relaxed mt-2 flex-1">{rule.description}</p>
+              <div className="pt-3 mt-3 border-t border-border-subtle flex items-center justify-between text-[10px] text-ink-tertiary">
+                <span>Type: <strong className="text-ink-secondary font-medium">{rule.verification_type}</strong></span>
+                <span className="font-mono">{rule.rule_id}</span>
               </div>
             </div>
           ))}
         </div>
       )}
+
+      <div className="bg-canvas border border-border-subtle rounded-xl p-3 text-[11px] text-ink-secondary leading-relaxed">
+        <span className="font-medium text-ink">Statutory Notice:</span> This registry mirrors the official Legal Metrology (Packaged Commodities) Rules, 2011 as amended. Rule evaluation is deterministic and auditable – no AI decides compliance.
+      </div>
     </div>
   );
 };

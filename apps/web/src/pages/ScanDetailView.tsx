@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Play, RefreshCw, Layers, AlertCircle, FileText, ShieldCheck } from 'lucide-react';
 import { api } from '../services/api';
 import { ComplianceFindingsView } from '../components/compliance/ComplianceFindingsView';
 import { OCRVisualizer } from '../components/scan/OCRVisualizer';
@@ -52,9 +51,9 @@ export const ScanDetailView: React.FC<ScanDetailViewProps> = ({ scanId, onBack }
 
   if (loading) {
     return (
-      <div className="p-16 text-center text-slate-400 space-y-3">
-        <RefreshCw className="w-8 h-8 mx-auto animate-spin text-gold-400" />
-        <p className="text-sm font-semibold">Loading package inspection records...</p>
+      <div className="py-16 text-center">
+        <div className="w-8 h-8 border-2 border-border border-t-ink rounded-full animate-spin mx-auto" />
+        <p className="text-[12px] text-ink-secondary mt-3">Loading package inspection records…</p>
       </div>
     );
   }
@@ -62,16 +61,11 @@ export const ScanDetailView: React.FC<ScanDetailViewProps> = ({ scanId, onBack }
   if (error || !scan) {
     return (
       <div className="space-y-4">
-        <button
-          onClick={onBack}
-          className="inline-flex items-center space-x-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Ledger</span>
+        <button onClick={onBack} className="inline-flex items-center gap-1.5 text-[12px] font-medium text-ink-secondary hover:text-ink">
+          <span>←</span> Back to Ledger
         </button>
-        <div className="p-6 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm flex items-center space-x-3">
-          <AlertCircle className="w-5 h-5 flex-shrink-0 text-rose-400" />
-          <span>{error || 'Scan not found.'}</span>
+        <div className="p-4 rounded-xl bg-danger-bg border border-danger-border text-danger text-[12px] flex gap-2.5">
+          <span>⚠</span><span>{error || 'Scan not found.'}</span>
         </div>
       </div>
     );
@@ -81,131 +75,67 @@ export const ScanDetailView: React.FC<ScanDetailViewProps> = ({ scanId, onBack }
   const hasFacts = !!scan.facts;
 
   return (
-    <div className="space-y-6">
-      {/* Navigation & Case Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={onBack}
-            className="p-2 rounded-lg bg-gov-800 hover:bg-gov-700 text-slate-300 hover:text-white border border-slate-700 transition-all cursor-pointer"
-            title="Back to Inspection Ledger"
-          >
-            <ArrowLeft className="w-4 h-4" />
+    <div className="space-y-5">
+      {/* Case header */}
+      <div className="bg-surface border border-border rounded-xl p-4 shadow-soft flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex items-start gap-3 min-w-0">
+          <button onClick={onBack} className="p-2 rounded-lg border border-border bg-surface hover:bg-surface-hover text-ink-secondary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 12H5" /><path d="M12 19l-7-7 7-7" /></svg>
           </button>
-          <div>
-            <div className="flex items-center space-x-3">
-              <h1 className="text-xl font-bold text-white tracking-tight font-mono">{scan.scan_number}</h1>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-[14px] font-semibold font-mono tracking-tight text-ink">{scan.scan_number}</h1>
               <StatusBadge status={scan.overall_verdict || scan.status} size="sm" />
-              {scan.compliance_score !== null && scan.compliance_score !== undefined && (
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold font-mono bg-gov-800 text-gold-300 border border-gold-500/30">
-                  {scan.compliance_score.toFixed(1)}% Score
-                </span>
+              {scan.compliance_score != null && (
+                <span className="px-2 py-0.5 rounded-full bg-surface-subtle border border-border text-[11px] font-mono font-medium text-ink">{scan.compliance_score.toFixed(1)}% Score</span>
               )}
+              <span className="px-2 py-0.5 rounded-full bg-surface-subtle border border-border text-[10px] text-ink-tertiary">{scan.commodity_type.replace(/_/g,' ')}</span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Category: <strong className="text-slate-200">{scan.commodity_type}</strong> • Jurisdiction:{' '}
-              <span className="text-slate-300">PCR 2011 (Amended 2023)</span> • Scanned on{' '}
-              {new Date(scan.created_at).toLocaleString()}
-            </p>
+            <div className="text-[11px] text-ink-tertiary mt-1">
+              PCR 2011 (Amended 2023) • Scanned {new Date(scan.created_at).toLocaleString()} • Ruleset {scan.ruleset_version}
+            </div>
           </div>
         </div>
 
-        {/* Action Controls */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-2">
           {!hasAnalysis ? (
-            <button
-              onClick={handleRunPipeline}
-              disabled={analyzing}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center space-x-2 ${
-                analyzing
-                  ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 shadow-md cursor-pointer'
-              }`}
-            >
-              {analyzing ? (
-                <>
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  <span>Executing Verification Pipeline...</span>
-                </>
-              ) : (
-                <>
-                  <Play className="w-3.5 h-3.5" />
-                  <span>Run Verification Pipeline</span>
-                </>
-              )}
+            <button onClick={handleRunPipeline} disabled={analyzing} className={`px-4 py-2 rounded-lg text-[12px] font-medium border ${analyzing ? 'bg-surface-subtle text-ink-tertiary border-border-subtle' : 'bg-ink text-white border-ink hover:bg-black'}`}>
+              {analyzing ? 'Executing pipeline…' : 'Run Verification Pipeline'}
             </button>
           ) : (
             <>
-              <a
-                href={api.getPdfReportUrl(scanId)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-3.5 py-2 rounded-lg text-xs font-semibold bg-gold-500 hover:bg-gold-400 text-slate-950 transition-all flex items-center space-x-1.5 shadow-sm font-bold"
-              >
-                <FileText className="w-3.5 h-3.5" />
-                <span>Inspection PDF</span>
+              <a href={api.getPdfReportUrl(scanId)} target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg bg-ink text-white text-[12px] font-medium border border-ink hover:bg-black">
+                Inspection PDF
               </a>
-              <button
-                onClick={handleRunPipeline}
-                disabled={analyzing}
-                className="px-3.5 py-2 rounded-lg text-xs font-semibold bg-gov-800 hover:bg-gov-700 text-slate-300 hover:text-white border border-slate-700 transition-all flex items-center space-x-1.5 cursor-pointer"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${analyzing ? 'animate-spin' : ''}`} />
-                <span>Re-verify</span>
+              <button onClick={handleRunPipeline} disabled={analyzing} className="px-3 py-2 rounded-lg bg-surface border border-border text-[12px] font-medium hover:border-border-strong">
+                {analyzing ? 'Re-verifying…' : 'Re-verify'}
               </button>
             </>
           )}
         </div>
       </div>
 
-      {/* Primary Sub-view Navigation Tabs */}
+      {/* Tabs */}
       {hasAnalysis && (
-        <div className="flex items-center space-x-2 border-b border-slate-800 pb-2 text-xs overflow-x-auto">
-          <button
-            onClick={() => setActiveTab('compliance')}
-            className={`px-4 py-2 rounded-lg font-semibold transition-all whitespace-nowrap cursor-pointer flex items-center space-x-1.5 ${
-              activeTab === 'compliance'
-                ? 'bg-gold-500 text-slate-950 shadow-sm font-bold'
-                : 'text-slate-400 hover:text-white hover:bg-gov-800'
-            }`}
-          >
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Compliance Audit &amp; Legal Findings ({scan.findings?.length || 0})</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('facts')}
-            className={`px-4 py-2 rounded-lg font-semibold transition-all whitespace-nowrap cursor-pointer ${
-              activeTab === 'facts'
-                ? 'bg-gold-500 text-slate-950 shadow-sm font-bold'
-                : 'text-slate-400 hover:text-white hover:bg-gov-800'
-            }`}
-          >
-            Structured Declarations (Facts Sheet)
-          </button>
-          <button
-            onClick={() => setActiveTab('cv')}
-            className={`px-4 py-2 rounded-lg font-semibold transition-all whitespace-nowrap cursor-pointer ${
-              activeTab === 'cv'
-                ? 'bg-gold-500 text-slate-950 shadow-sm font-bold'
-                : 'text-slate-400 hover:text-white hover:bg-gov-800'
-            }`}
-          >
-            CV Measurements (Rules 7 &amp; 8)
-          </button>
-          <button
-            onClick={() => setActiveTab('ocr')}
-            className={`px-4 py-2 rounded-lg font-semibold transition-all whitespace-nowrap cursor-pointer ${
-              activeTab === 'ocr'
-                ? 'bg-gold-500 text-slate-950 shadow-sm font-bold'
-                : 'text-slate-400 hover:text-white hover:bg-gov-800'
-            }`}
-          >
-            Interactive OCR Visualizer ({scan.ocr_result?.tokens?.length || 0} Tokens)
-          </button>
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-surface-subtle border border-border-subtle w-fit overflow-x-auto">
+          {[
+            { id: 'compliance', label: `Compliance Audit (${scan.findings?.length || 0})` },
+            { id: 'facts', label: 'Facts Sheet' },
+            { id: 'cv', label: 'CV Measurements' },
+            { id: 'ocr', label: `OCR Visualizer (${scan.ocr_result?.tokens?.length || 0})` },
+          ].map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id as any)}
+              className={`px-3 py-1.5 rounded-lg text-[12px] font-medium whitespace-nowrap transition-colors ${activeTab === t.id ? 'bg-surface border border-border shadow-soft text-ink' : 'text-ink-secondary hover:text-ink'}`}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
       )}
 
-      {/* Main Content Area */}
+      {/* Content */}
       {hasAnalysis ? (
         activeTab === 'compliance' ? (
           <ComplianceFindingsView
@@ -223,28 +153,14 @@ export const ScanDetailView: React.FC<ScanDetailViewProps> = ({ scanId, onBack }
         ) : activeTab === 'cv' && hasFacts ? (
           <CVFindingsView facts={scan.facts} />
         ) : (
-          <OCRVisualizer
-            imageUrl={scan.image_url}
-            ocrResult={scan.ocr_result}
-          />
+          <OCRVisualizer imageUrl={scan.image_url} ocrResult={scan.ocr_result} />
         )
       ) : (
-        <div className="glass-panel rounded-2xl p-12 text-center space-y-4 border border-slate-700/80">
-          <div className="w-16 h-16 rounded-full bg-gov-800 border border-gold-500/30 flex items-center justify-center mx-auto text-gold-400">
-            <Layers className="w-8 h-8" />
-          </div>
-          <h2 className="text-lg font-bold text-white">Verification Engine Ready</h2>
-          <p className="text-xs text-slate-400 max-w-md mx-auto">
-            Package photograph uploaded and integrity verified. Click below to execute the end-to-end Legal Metrology verification pipeline: OCR &rarr; Facts &rarr; CV Measurements &rarr; Statutory Rule Evaluation &rarr; Scoring.
-          </p>
-          <button
-            onClick={handleRunPipeline}
-            disabled={analyzing}
-            className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-slate-950 font-bold text-xs rounded-lg shadow-md transition-all inline-flex items-center space-x-2 cursor-pointer"
-          >
-            <Play className="w-4 h-4" />
-            <span>Execute Verification Pipeline</span>
-          </button>
+        <div className="bg-surface border border-border rounded-xl p-12 text-center shadow-soft">
+          <div className="w-12 h-12 rounded-xl bg-surface-subtle border border-border flex items-center justify-center mx-auto text-ink-tertiary mb-3">◍</div>
+          <div className="text-[14px] font-semibold text-ink">Verification Engine Ready</div>
+          <div className="text-[12px] text-ink-secondary mt-1 max-w-md mx-auto leading-relaxed">Package photograph uploaded and integrity verified. Execute the end-to-end Legal Metrology pipeline: OCR → Facts → CV → Rule Evaluation → Scoring.</div>
+          <button onClick={handleRunPipeline} disabled={analyzing} className="mt-5 px-4 py-2 bg-ink text-white text-[12px] font-medium rounded-lg hover:bg-black">Execute Verification Pipeline</button>
         </div>
       )}
     </div>
