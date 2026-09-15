@@ -39,8 +39,8 @@ class Settings(BaseSettings):
         "*"
     ]
     
-    # OCR Provider: "mock", "paddle", or "tesseract"
-    OCR_PROVIDER: str = "mock"
+    # OCR Provider: "easyocr", "mock", "paddle", or "tesseract"
+    OCR_PROVIDER: str = "easyocr"
 
     model_config = {
         "env_file": ".env",
