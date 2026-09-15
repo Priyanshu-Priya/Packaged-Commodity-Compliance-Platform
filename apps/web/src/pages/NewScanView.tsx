@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { UploadCloud, FileImage, CheckCircle, AlertCircle, Sparkles, ArrowRight } from 'lucide-react';
+import { UploadCloud, FileImage, CheckCircle, AlertCircle, Sparkles, ArrowRight, Camera } from 'lucide-react';
 import { api } from '../services/api';
+import { CameraCapture } from '../components/CameraCapture';
 
 interface NewScanViewProps {
   onScanCreated: (scanId: string) => void;
@@ -13,6 +14,7 @@ export const NewScanView: React.FC<NewScanViewProps> = ({ onScanCreated }) => {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadResult, setUploadResult] = useState<any | null>(null);
+  const [showCamera, setShowCamera] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,6 +40,15 @@ export const NewScanView: React.FC<NewScanViewProps> = ({ onScanCreated }) => {
     }
   };
 
+  const handleCameraCapture = (file: File) => {
+    setSelectedFile(file);
+    setError(null);
+    setUploadResult(null);
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    setShowCamera(false);
+  };
+
   const handleUpload = async () => {
     if (!selectedFile) {
       setError('Please select or capture a packaged commodity image first.');
@@ -59,6 +70,14 @@ export const NewScanView: React.FC<NewScanViewProps> = ({ onScanCreated }) => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      {/* Camera Capture Modal */}
+      {showCamera && (
+        <CameraCapture
+          onCapture={handleCameraCapture}
+          onClose={() => setShowCamera(false)}
+        />
+      )}
+
       {/* Page Title */}
       <div>
         <h1 className="text-2xl font-bold text-white tracking-tight">Initiate Package Compliance Inspection</h1>
@@ -78,11 +97,28 @@ export const NewScanView: React.FC<NewScanViewProps> = ({ onScanCreated }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Left 2 Cols: Drag & Drop Zone */}
         <div className="md:col-span-2 space-y-4">
+          {/* Camera and Upload Options */}
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowCamera(true)}
+              className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all shadow-lg hover:shadow-blue-500/20"
+            >
+              <Camera className="w-5 h-5" />
+              <span>Capture from Camera</span>
+            </button>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex-1 py-3 px-4 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all border border-slate-700"
+            >
+              <UploadCloud className="w-5 h-5" />
+              <span>Upload from Files</span>
+            </button>
+          </div>
+
           <div
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-slate-700 hover:border-gold-500/60 rounded-2xl p-8 text-center cursor-pointer bg-gov-850/60 hover:bg-gov-800/60 transition-all flex flex-col items-center justify-center min-h-[300px]"
+            className="border-2 border-dashed border-slate-700 hover:border-gold-500/60 rounded-2xl p-8 text-center bg-gov-850/60 hover:bg-gov-800/60 transition-all flex flex-col items-center justify-center min-h-[280px]"
           >
             <input
               ref={fileInputRef}
@@ -108,11 +144,11 @@ export const NewScanView: React.FC<NewScanViewProps> = ({ onScanCreated }) => {
             ) : (
               <div className="space-y-3">
                 <div className="w-16 h-16 rounded-full bg-gov-800 border border-gold-500/30 flex items-center justify-center mx-auto text-gold-400">
-                  <UploadCloud className="w-8 h-8" />
+                  <FileImage className="w-8 h-8" />
                 </div>
-                <h3 className="text-base font-semibold text-white">Upload Package Photograph</h3>
+                <h3 className="text-base font-semibold text-white">No Image Selected</h3>
                 <p className="text-xs text-slate-400 max-w-sm">
-                  Drag and drop your image here, or click to browse files from your computer or field tablet.
+                  Capture using your camera or drag and drop image here
                 </p>
                 <div className="flex items-center justify-center space-x-2 text-[11px] text-slate-500">
                   <span>JPEG, PNG, WebP</span>
