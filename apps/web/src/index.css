@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gov-900 text-slate-100;
+  }
+}
+
+/* Glassmorphism panel styles */
+.glass-panel {
+  background: rgba(16, 34, 58, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+}
+
+.glass-panel-subtle {
+  background: rgba(11, 23, 40, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #07101B;
+}
+::-webkit-scrollbar-thumb {
+  background: #19355A;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #23497C;
+}

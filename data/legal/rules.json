@@ -1,0 +1,145 @@
+{
+  "ruleset_version": "PC_RULES_2011_v2023",
+  "title": "Legal Metrology (Packaged Commodities) Rules, 2011",
+  "effective_date": "2011-03-07",
+  "last_amended": "2023-01-01",
+  "rules": [
+    {
+      "rule_id": "PC_RULE_6_1_A_MANUFACTURER",
+      "source_rule": "Rule 6(1)(a)",
+      "category": "MANDATORY_DECLARATION",
+      "title": "Name and Complete Address of Manufacturer / Packer / Importer",
+      "description": "Every package shall bear the name and complete address of the manufacturer, or where the manufacturer is not the packer, the name and address of the manufacturer and packer, or for imported packages, the name and address of the importer and the country of origin.",
+      "verification_type": "TEXT_PRESENCE",
+      "severity": "HIGH",
+      "required_fields": ["manufacturer_or_packer_or_importer", "address"],
+      "enabled": true
+    },
+    {
+      "rule_id": "PC_RULE_6_1_B_GENERIC_NAME",
+      "source_rule": "Rule 6(1)(b)",
+      "category": "MANDATORY_DECLARATION",
+      "title": "Generic or Common Name of Commodity",
+      "description": "Every package shall bear the common or generic names of the commodity contained in the package and, in case of packages with more than one product, the name and number or quantity of each product.",
+      "verification_type": "TEXT_PRESENCE",
+      "severity": "HIGH",
+      "required_fields": ["generic_name"],
+      "enabled": true
+    },
+    {
+      "rule_id": "PC_RULE_6_1_C_NET_QUANTITY",
+      "source_rule": "Rule 6(1)(c)",
+      "category": "QUANTITY",
+      "title": "Net Quantity in Standard Metric Units",
+      "description": "Every package shall bear the net quantity, in terms of the standard unit of weight or measure, of the commodity contained in the package, or where the commodity is sold by number, the number of the commodity contained in the package (in conformity with Rules 11, 12, and 13).",
+      "verification_type": "NUMERICAL_RANGE",
+      "severity": "HIGH",
+      "required_fields": ["net_quantity_value", "net_quantity_unit"],
+      "allowed_units": ["g", "kg", "ml", "l", "ltr", "m", "cm", "mm", "N", "U", "pieces", "units"],
+      "enabled": true
+    },
+    {
+      "rule_id": "PC_RULE_6_1_D_DATE",
+      "source_rule": "Rule 6(1)(d)",
+      "category": "DATE",
+      "title": "Month and Year of Manufacture / Pre-packing / Import",
+      "description": "Every package shall bear the month and year in which the commodity is manufactured or pre-packed or imported, provided that for packages containing commodities which may become unfit for consumption after a period, the 'Best Before' or 'Use By' date, month and year shall also be declared.",
+      "verification_type": "DATE_VALIDITY",
+      "severity": "HIGH",
+      "required_fields": ["mfg_or_pkd_date"],
+      "enabled": true
+    },
+    {
+      "rule_id": "PC_RULE_6_1_DA_USP",
+      "source_rule": "Rule 6(1)(da)",
+      "category": "MRP",
+      "title": "Unit Sale Price (USP)",
+      "description": "Declaration of Unit Sale Price is mandatory on pre-packaged commodities: per gram or per milliliter where net quantity is less than 1 kg or 1 liter, and per kilogram or per liter where net quantity is more than 1 kg or 1 liter, or per item where sold by number.",
+      "verification_type": "CONDITIONAL_PRESENCE",
+      "severity": "MEDIUM",
+      "required_fields": ["unit_sale_price"],
+      "trigger_condition": {
+        "field": "net_quantity_value",
+        "threshold": 1.0,
+        "units": ["kg", "l", "ltr"]
+      },
+      "enabled": true
+    },
+    {
+      "rule_id": "PC_RULE_6_1_E_MRP",
+      "source_rule": "Rule 6(1)(e)",
+      "category": "MRP",
+      "title": "Maximum Retail Price (MRP) Inclusive of All Taxes",
+      "description": "Every package shall bear the retail sale price of the package clearly indicating 'Maximum Retail Price' or 'MRP' inclusive of all taxes.",
+      "verification_type": "TEXT_PRESENCE",
+      "severity": "HIGH",
+      "required_fields": ["mrp_value", "mrp_currency", "inclusive_of_taxes_clause"],
+      "enabled": true
+    },
+    {
+      "rule_id": "PC_RULE_6_1_N_CONSUMER_CARE",
+      "source_rule": "Rule 6(1)(n)",
+      "category": "MANDATORY_DECLARATION",
+      "title": "Consumer Care Contact Details",
+      "description": "Every package shall bear the name, address, telephone number, and e-mail address, if available, of the person who can be or the office which can be contacted, in case of consumer complaints.",
+      "verification_type": "MULTI_FIELD_PRESENCE",
+      "severity": "HIGH",
+      "required_any_fields": ["consumer_care_email", "consumer_care_phone", "consumer_care_address"],
+      "enabled": true
+    },
+    {
+      "rule_id": "PC_RULE_7_FONT_SIZE",
+      "source_rule": "Rule 7",
+      "category": "FONT_SIZE",
+      "title": "Minimum Height of Numerals and Letters",
+      "description": "The height of any numeral and letter in the declaration shall not be less than the minimum height specified in Table I or Table II of Rule 7, determined by the net quantity or Principal Display Panel area.",
+      "verification_type": "VISUAL_MEASUREMENT",
+      "severity": "MEDIUM",
+      "enabled": true
+    },
+    {
+      "rule_id": "PC_RULE_8_LEGIBILITY",
+      "source_rule": "Rule 8",
+      "category": "LEGIBILITY",
+      "title": "Conspicuousness and Legibility of Declarations",
+      "description": "Every declaration required to be made under these rules shall be legible, prominent, definite, plain, and conspicuous, having sufficient contrast against the background.",
+      "verification_type": "VISUAL_MEASUREMENT",
+      "severity": "HIGH",
+      "enabled": true
+    },
+    {
+      "rule_id": "PC_RULE_9_PDP_GROUPING",
+      "source_rule": "Rule 9",
+      "category": "PLACEMENT",
+      "title": "Principal Display Panel (PDP) and Grouping",
+      "description": "All mandatory declarations shall appear grouped together on the Principal Display Panel or clearly designated panel, without being obscured by commercial artwork.",
+      "verification_type": "VISUAL_MEASUREMENT",
+      "severity": "MEDIUM",
+      "enabled": true
+    },
+    {
+      "rule_id": "PC_RULE_10_STANDARD_UNITS",
+      "source_rule": "Rule 10",
+      "category": "UNIT",
+      "title": "Prohibition of Non-Standard Units or Misleading Phrases",
+      "description": "No declaration of quantity shall be expressed in non-metric units or accompanied by misleading qualifying words such as 'jumbo', 'full', 'giant', or 'approximate'.",
+      "verification_type": "RULE_CHECK",
+      "severity": "HIGH",
+      "disallowed_units": ["lbs", "oz", "ounce", "pound", "pint", "quart", "gallon"],
+      "disallowed_qualifiers": ["approx", "approximate", "jumbo", "extra large", "minimum weight"],
+      "enabled": true
+    },
+    {
+      "rule_id": "PC_RULE_26_EXEMPTIONS",
+      "source_rule": "Rule 26",
+      "category": "EXEMPTION",
+      "title": "Statutory Exemptions from Chapter II",
+      "description": "Nothing contained in these rules shall apply to any package containing a commodity if the net weight or measure of the commodity is 10 grams or 10 milliliters or less (subject to statutory exceptions), or if packaged for institutional/industrial consumers.",
+      "verification_type": "APPLICABILITY_CHECK",
+      "severity": "HIGH",
+      "threshold_weight_g": 10.0,
+      "threshold_volume_ml": 10.0,
+      "enabled": true
+    }
+  ]
+}

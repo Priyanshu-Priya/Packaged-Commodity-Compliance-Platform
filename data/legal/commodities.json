@@ -1,0 +1,55 @@
+{
+  "commodities": [
+    {
+      "id": "FOOD_GRAINS",
+      "name": "Food Grains, Cereals and Pulses (Rice, Wheat, Atta, Dal)",
+      "category": "Food",
+      "schedule": "Second Schedule",
+      "standard_quantities": ["100g", "200g", "500g", "1kg", "2kg", "5kg", "10kg"],
+      "exemption_weight_threshold_kg": 50.0
+    },
+    {
+      "id": "EDIBLE_OILS",
+      "name": "Edible Oils, Vanaspati, Ghee",
+      "category": "Food",
+      "schedule": "Second Schedule",
+      "standard_quantities": ["50g", "100g", "200g", "500g", "1kg", "2kg", "3kg", "5kg", "50ml", "100ml", "200ml", "500ml", "1l", "2l", "3l", "5l"],
+      "requires_usp": true
+    },
+    {
+      "id": "BISCUITS_CONFECTIONERY",
+      "name": "Biscuits, Bread and Confectionery",
+      "category": "Food",
+      "schedule": "General",
+      "standard_quantities": ["25g", "50g", "75g", "100g", "150g", "200g", "250g", "300g", "400g", "500g", "1kg"]
+    },
+    {
+      "id": "TEA_COFFEE",
+      "name": "Tea and Coffee",
+      "category": "Beverage",
+      "schedule": "Second Schedule",
+      "standard_quantities": ["25g", "50g", "100g", "250g", "500g", "1kg"]
+    },
+    {
+      "id": "SOAP_DETERGENT",
+      "name": "Soaps and Detergents",
+      "category": "Household Goods",
+      "schedule": "General",
+      "standard_quantities": ["25g", "50g", "75g", "100g", "125g", "150g", "200g", "250g", "500g", "1kg"]
+    },
+    {
+      "id": "BEVERAGES",
+      "name": "Packaged Drinking Water and Aerated Beverages",
+      "category": "Beverage",
+      "schedule": "Second Schedule",
+      "standard_quantities": ["100ml", "150ml", "200ml", "250ml", "300ml", "500ml", "750ml", "1l", "1.5l", "2l", "5l"]
+    },
+    {
+      "id": "GENERAL_PACKAGED_GOODS",
+      "name": "General Consumer Commodities",
+      "category": "General",
+      "schedule": "General",
+      "standard_quantities": []
+    }
+  ]
+}

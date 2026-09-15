@@ -1,0 +1,52 @@
+{
+  "statutory_exemptions": [
+    {
+      "exemption_id": "EXEMPT_RULE_26_A_WEIGHT_OR_VOL",
+      "rule": "Rule 26(a)",
+      "title": "Packages containing 10g or 10ml or less",
+      "description": "Packages with net quantity equal to or less than 10 grams or 10 milliliters (except tobacco and tobacco products).",
+      "criteria": {
+        "max_weight_grams": 10.0,
+        "max_volume_ml": 10.0,
+        "excluded_commodities": ["Tobacco", "Bidi", "Cigarette"]
+      }
+    },
+    {
+      "exemption_id": "EXEMPT_RULE_26_B_HOTEL_RESTAURANT",
+      "rule": "Rule 26(b)",
+      "title": "Fast food items packed by hotel or restaurant",
+      "description": "Packages containing fast food items packed by a restaurant or hotel, serving customers across the counter.",
+      "criteria": {
+        "package_type": "RESTAURANT_FAST_FOOD"
+      }
+    },
+    {
+      "exemption_id": "EXEMPT_RULE_26_C_DRUGS",
+      "rule": "Rule 26(c)",
+      "title": "Scheduled and Non-scheduled Drugs",
+      "description": "Drugs covered under the Drugs (Prices Control) Order, 1995.",
+      "criteria": {
+        "package_type": "DRUGS_DPCO"
+      }
+    },
+    {
+      "exemption_id": "EXEMPT_RULE_26_D_AGRI_50KG",
+      "rule": "Rule 26(d)",
+      "title": "Agricultural produce packages exceeding 50kg",
+      "description": "Packages of agricultural produce containing quantities more than 50 kg.",
+      "criteria": {
+        "min_weight_kg": 50.0,
+        "commodity_category": "Agricultural Produce"
+      }
+    },
+    {
+      "exemption_id": "EXEMPT_INSTITUTIONAL_INDUSTRIAL",
+      "rule": "Rule 3 Explanation",
+      "title": "Industrial or Institutional Consumers",
+      "description": "Packages intended for institutional consumers (service institutions like transport, hotels, hospitals) or industrial consumers for use in production/manufacturing, not for retail sale.",
+      "criteria": {
+        "consumer_channel": "INSTITUTIONAL_INDUSTRIAL"
+      }
+    }
+  ]
+}
