@@ -1,3 +1,4 @@
+import re
 import cv2
 import numpy as np
 from typing import List, Optional
@@ -19,32 +20,51 @@ class EasyOCREngine(BaseOCRProvider):
         return self._reader
 
     def extract(self, image_bytes: bytes) -> OCRResult:
+        # Enhanced preprocessing for better OCR accuracy
         processed_img, quality = ImagePreprocessor.preprocess_pipeline(
             image_bytes,
             apply_resize=True,
-            apply_denoise=False,
+            apply_denoise=True,      # Enable denoising for clearer text
             apply_contrast=True,
-            apply_deskew=False
+            apply_deskew=True        # Enable deskewing for tilted images
         )
         height, width = processed_img.shape[:2]
 
         reader = self._get_reader()
-        # EasyOCR expects RGB or BGR numpy array
+        # EasyOCR expects RGB numpy array
         rgb_img = cv2.cvtColor(processed_img, cv2.COLOR_BGR2RGB)
-        raw_results = reader.readtext(rgb_img)
+
+        # Use higher confidence threshold and text detection parameters
+        raw_results = reader.readtext(
+            rgb_img,
+            detail=1,
+            paragraph=False,
+            min_size=10,           # Minimum text box size
+            text_threshold=0.6,    # Lower threshold to catch more text
+            low_text=0.3,
+            link_threshold=0.3,
+            canvas_size=2560,      # Larger canvas for better detection
+            mag_ratio=1.5          # Magnification ratio
+        )
 
         # Sort raw detections top-to-bottom, then left-to-right (reading order)
         # item: (polygon, text, confidence)
         sorted_results = sorted(
             raw_results,
-            key=lambda item: (round(min(p[1] for p in item[0]) / 20) * 20, min(p[0] for p in item[0]))
+            key=lambda item: (round(min(p[1] for p in item[0]) / 30) * 30, min(p[0] for p in item[0]))
         )
 
         tokens: List[OCRToken] = []
         for idx, (poly, text, conf) in enumerate(sorted_results, start=1):
             cleaned_text = text.strip()
-            if not cleaned_text:
+
+            # Skip empty or very short low-confidence results
+            if not cleaned_text or (len(cleaned_text) < 2 and conf < 0.5):
                 continue
+
+            # Clean up common OCR artifacts
+            cleaned_text = cleaned_text.replace('|', 'I')  # Pipe to I
+            cleaned_text = re.sub(r'\s+', ' ', cleaned_text)  # Normalize spaces
 
             # Convert polygon to normalized [x1, y1, x2, y2]
             px_x1 = min(p[0] for p in poly)
